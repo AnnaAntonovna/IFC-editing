@@ -78,7 +78,25 @@ const input = document.getElementById("file-input");
 const ifcLoader = new IFCLoader();
 
 async function editFloorName(){
-  const storeys = await Loader.ifcManager.getAllItemsOfType(model.modelID, IFCBUILDINGSTOREY, false)
+  const storeyIds = await ifcLoader.ifcManager.getAllItemsOfType(model.modelID, IFCBUILDINGSTOREY, false);
+  const firstStoreyId = storeyIds[0];
+  const storey = await ifcLoader.ifcManager.getItemProperties(model.modelID, firstStoreyId);
+  console.log(storey);
+
+  const result = prompt("Introduce the new name for the storey.");
+  storey.LongName.value = result;
+  ifcLoader.ifcManager.ifcAPI.WriteLine(model.modelID, storey);
+
+  const data = await ifcLoader.ifcManager.ifcAPI.ExportFileAsIFC(0);
+  const blob = new Blob([data]);
+  const file = new ([blob], "modified.ifc");
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(file);
+  document.body.appendChild(link);
+  link.click();
+
+  link.remove();
 };
 
 let model;
@@ -89,6 +107,7 @@ input.addEventListener(
         const ifcURL = URL.createObjectURL(changed.target.files[0]);
         model = await ifcLoader.loadAsync(ifcURL);
         scene.add(model);
+        await editFloorName();
     },
     false
 );
