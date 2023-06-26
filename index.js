@@ -92,6 +92,7 @@ async function editFloorName(){
   const file = new ([blob], "modified.ifc");
 
   const link = document.createElement('a');
+  link.download = 'modified.ifc';
   link.href = URL.createObjectURL(file);
   document.body.appendChild(link);
   link.click();
